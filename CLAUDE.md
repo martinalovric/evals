@@ -34,10 +34,16 @@ uv run eval_demo_gpt4.py        # GPT-4o-mini + Chat Completions
 uv run eval_demo_gemini.py      # Gemini 2.0 Flash Lite (may hit rate limits)
 
 # Verify evaluator against ground truth labels
-uv run verify_evaluator.py                    # Full 200 samples
-uv run verify_evaluator.py --sample 50        # Quick test with 50 samples
-uv run verify_evaluator.py --category edge_cases  # Filter by category
-uv run verify_evaluator.py --train-test       # Use 75/25 split
+uv run verify_evaluator.py                              # Full 200 samples
+uv run verify_evaluator.py --sample 50                  # Quick test with 50 samples
+uv run verify_evaluator.py --model gpt-5-nano-2025-08-07  # Test different model
+uv run verify_evaluator.py --category edge_cases        # Filter by category
+uv run verify_evaluator.py --output results/custom.jsonl  # Custom output file
+
+# Visualize evaluation runs
+uv run plot_runs.py                        # Show plots interactively
+uv run plot_runs.py --output results/plots # Save to directory
+uv run plot_runs.py --last 5               # Only last 5 runs
 
 # Data generation pipeline
 uv run scripts/generate_hard_questions.py     # Generate questions + answers (GPT-5.1 + GPT-3.5)
@@ -55,13 +61,15 @@ uv add package-name
 ├── eval_demo_gpt4.py         # GPT-4o-mini provider demo
 ├── eval_demo_gpt5.py         # GPT-5.1 provider demo (best practices)
 ├── verify_evaluator.py       # Verify smaller model vs ground truth
+├── plot_runs.py              # Visualize run comparisons (matplotlib)
 ├── scripts/
 │   ├── generate_answers.py   # Gemini answer generation
 │   ├── generate_hard_questions.py  # Question generation (GPT-5.1)
 │   └── label_responses.py    # Labeling with function calling (GPT-5.1)
 ├── data/
-│   ├── questions.csv         # v1: 3.5% fail rate (too low)
 │   └── questions_version_2.csv  # v2: 35.5% fail rate (good signal)
+├── results/
+│   └── runs.jsonl            # Evaluation run logs (gitignored)
 ├── EVAL_PROVIDERS.md         # Detailed provider comparison
 ├── LESSONS_LEARNED.md        # API patterns and gotchas
 └── README.md                 # User documentation
@@ -90,7 +98,8 @@ uv add package-name
 | Provider | Model | API | Use Case |
 |----------|-------|-----|----------|
 | OpenAI | gpt-5.1-2025-11-13 | Responses API | Labeling, question generation |
-| OpenAI | gpt-5-mini-2025-08-07 | Responses API | Evaluator (cheaper) |
+| OpenAI | gpt-5-mini-2025-08-07 | Responses API | Evaluator (good balance) |
+| OpenAI | gpt-5-nano-2025-08-07 | Responses API | Evaluator (cheapest) |
 | OpenAI | gpt-4o-mini | Chat Completions | Demo comparison |
 | OpenAI | gpt-3.5-turbo-0125 | Chat Completions | Weak answer model |
 | Google | gemini-2.0-flash-lite | generate_content | Answer generation |

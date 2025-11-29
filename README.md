@@ -42,13 +42,15 @@ uv run verify_evaluator.py --sample 50
 ├── eval_demo_gpt4.py         # GPT-4o-mini (Chat Completions)
 ├── eval_demo_gpt5.py         # GPT-5.1 (Responses API + function calling)
 ├── verify_evaluator.py       # Verify evaluator vs ground truth labels
+├── plot_runs.py              # Visualize run comparisons
 ├── scripts/
 │   ├── generate_answers.py   # Generate answers with Gemini
 │   ├── generate_hard_questions.py  # Generate challenging questions
 │   └── label_responses.py    # Label with GPT-5.1 function calling
 ├── data/
-│   ├── questions.csv         # v1: 200 questions, 3.5% fail rate
-│   └── questions_version_2.csv  # v2: 200 questions, 35.5% fail rate
+│   └── questions_version_2.csv  # 200 questions, 35.5% fail rate
+├── results/
+│   └── runs.jsonl            # Evaluation run logs (gitignored)
 ├── EVAL_PROVIDERS.md         # Provider comparison report
 ├── LESSONS_LEARNED.md        # API patterns and gotchas
 └── CLAUDE.md                 # Instructions for Claude Code
@@ -140,9 +142,16 @@ uv run eval_demo_gpt4.py
 uv run eval_demo_gemini.py
 
 # Verify evaluator against ground truth
-uv run verify_evaluator.py            # Full dataset
-uv run verify_evaluator.py --sample 50  # Sample
-uv run verify_evaluator.py --category precise_calculations
+uv run verify_evaluator.py                              # Full dataset
+uv run verify_evaluator.py --sample 50                  # Sample 50 items
+uv run verify_evaluator.py --model gpt-5-nano-2025-08-07  # Test different model
+uv run verify_evaluator.py --category precise_calculations  # Filter by category
+uv run verify_evaluator.py --output results/custom.jsonl    # Custom output file
+
+# Visualize evaluation runs
+uv run plot_runs.py                        # Show plots interactively
+uv run plot_runs.py --output results/plots # Save to directory
+uv run plot_runs.py --last 5               # Only last 5 runs
 
 # Data generation pipeline
 uv run scripts/generate_hard_questions.py  # Generate questions + answers
