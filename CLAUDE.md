@@ -41,9 +41,9 @@ uv run verify_evaluator.py --category edge_cases        # Filter by category
 uv run verify_evaluator.py --output results/custom.jsonl  # Custom output file
 
 # Visualize evaluation runs
-uv run plot_runs.py                        # Show plots interactively
-uv run plot_runs.py --output results/plots # Save to directory
-uv run plot_runs.py --last 5               # Only last 5 runs
+uv run plot_runs.py                   # Save to docs/plots/ (default, tracked in git)
+uv run plot_runs.py --last 5          # Only last 5 runs
+uv run plot_runs.py --output custom/  # Custom output directory
 
 # Data generation pipeline
 uv run scripts/generate_hard_questions.py     # Generate questions + answers (GPT-5.1 + GPT-3.5)
@@ -68,6 +68,8 @@ uv add package-name
 │   └── label_responses.py    # Labeling with function calling (GPT-5.1)
 ├── data/
 │   └── questions_version_2.csv  # v2: 35.5% fail rate (good signal)
+├── docs/
+│   └── plots/                # Generated visualizations (tracked in git)
 ├── results/
 │   └── runs.jsonl            # Evaluation run logs (gitignored)
 ├── EVAL_PROVIDERS.md         # Detailed provider comparison

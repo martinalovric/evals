@@ -4,10 +4,10 @@ Plot Evaluation Run Comparisons
 Visualizes differences between model evaluation runs from the JSONL log.
 
 Usage:
-    uv run plot_runs.py                    # Plot all runs
+    uv run plot_runs.py                       # Plot all runs (saves to docs/plots/)
     uv run plot_runs.py --input custom.jsonl  # Custom input file
-    uv run plot_runs.py --output plots/    # Save to directory
-    uv run plot_runs.py --last N           # Only plot last N runs
+    uv run plot_runs.py --output plots/       # Save to custom directory
+    uv run plot_runs.py --last N              # Only plot last N runs
 """
 
 import json
@@ -273,8 +273,8 @@ def main():
     parser = argparse.ArgumentParser(description="Plot evaluation run comparisons")
     parser.add_argument("--input", type=str, default="results/runs.jsonl",
                         help="Input JSONL file (default: results/runs.jsonl)")
-    parser.add_argument("--output", type=str, default=None,
-                        help="Output directory for plots (default: show interactively)")
+    parser.add_argument("--output", type=str, default="docs/plots",
+                        help="Output directory for plots (default: docs/plots)")
     parser.add_argument("--last", type=int, default=None,
                         help="Only use last N runs")
     args = parser.parse_args()

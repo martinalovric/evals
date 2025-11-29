@@ -49,6 +49,8 @@ uv run verify_evaluator.py --sample 50
 │   └── label_responses.py    # Label with GPT-5.1 function calling
 ├── data/
 │   └── questions_version_2.csv  # 200 questions, 35.5% fail rate
+├── docs/
+│   └── plots/                # Generated visualizations (tracked)
 ├── results/
 │   └── runs.jsonl            # Evaluation run logs (gitignored)
 ├── EVAL_PROVIDERS.md         # Provider comparison report
@@ -149,9 +151,9 @@ uv run verify_evaluator.py --category precise_calculations  # Filter by category
 uv run verify_evaluator.py --output results/custom.jsonl    # Custom output file
 
 # Visualize evaluation runs
-uv run plot_runs.py                        # Show plots interactively
-uv run plot_runs.py --output results/plots # Save to directory
-uv run plot_runs.py --last 5               # Only last 5 runs
+uv run plot_runs.py                   # Save to docs/plots/ (default)
+uv run plot_runs.py --last 5          # Only last 5 runs
+uv run plot_runs.py --output custom/  # Custom output directory
 
 # Data generation pipeline
 uv run scripts/generate_hard_questions.py  # Generate questions + answers
