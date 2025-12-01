@@ -10,11 +10,11 @@ through interactive plots and examples.
 
 import marimo
 
-__generated_with = "0.10.0"
+__generated_with = "0.18.1"
 app = marimo.App(width="medium")
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _():
     import marimo as mo
     import matplotlib.pyplot as plt
@@ -36,127 +36,119 @@ def _():
     return mo, np, plt
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        """
-        ## Part 1: Kappa vs Accuracy
+    mo.md("""
+    ## Part 1: Kappa vs Accuracy
 
-        Let's visualize how Kappa and accuracy diverge with imbalanced data.
-        """
-    )
+    Let's visualize how Kappa and accuracy diverge with imbalanced data.
+    """)
     return
 
 
 @app.cell
 def _(mo, np, plt):
-    def calculate_metrics(tp, tn, fp, fn):
-        """Calculate accuracy and kappa from confusion matrix."""
-        n = tp + tn + fp + fn
-        if n == 0:
-            return 0, 0
+    def _():
+        def calculate_metrics(tp, tn, fp, fn):
+            """Calculate accuracy and kappa from confusion matrix."""
+            n = tp + tn + fp + fn
+            if n == 0:
+                return 0, 0
 
-        # Accuracy
-        accuracy = (tp + tn) / n
+            # Accuracy
+            accuracy = (tp + tn) / n
 
-        # Kappa
-        po = accuracy
-        p_pred_pass = (tp + fp) / n
-        p_true_pass = (tp + fn) / n
-        p_pred_fail = (tn + fn) / n
-        p_true_fail = (tn + fp) / n
-        pe = (p_pred_pass * p_true_pass) + (p_pred_fail * p_true_fail)
+            # Kappa
+            po = accuracy
+            p_pred_pass = (tp + fp) / n
+            p_true_pass = (tp + fn) / n
+            p_pred_fail = (tn + fn) / n
+            p_true_fail = (tn + fp) / n
+            pe = (p_pred_pass * p_true_pass) + (p_pred_fail * p_true_fail)
 
-        kappa = (po - pe) / (1 - pe) if pe != 1 else 0
+            kappa = (po - pe) / (1 - pe) if pe != 1 else 0
 
-        return accuracy, kappa
+            return accuracy, kappa
 
-    # Simulate "always predict pass" with varying true failure rates
-    failure_rates = np.linspace(0.01, 0.5, 50)
-    n = 100
+        # Simulate "always predict pass" with varying true failure rates
+        failure_rates = np.linspace(0.01, 0.5, 50)
+        n = 100
 
-    accuracies = []
-    kappas = []
+        accuracies = []
+        kappas = []
 
-    for fail_rate in failure_rates:
-        n_fail = int(n * fail_rate)
-        n_pass = n - n_fail
+        for fail_rate in failure_rates:
+            n_fail = int(n * fail_rate)
+            n_pass = n - n_fail
 
-        # "Always predict pass" means:
-        # TP = all passes, FP = all fails (incorrectly called pass)
-        # TN = 0, FN = 0
-        tp = n_pass
-        fp = n_fail
-        tn = 0
-        fn = 0
+            # "Always predict pass" means:
+            # TP = all passes, FP = all fails (incorrectly called pass)
+            # TN = 0, FN = 0
+            tp = n_pass
+            fp = n_fail
+            tn = 0
+            fn = 0
 
-        acc, kap = calculate_metrics(tp, tn, fp, fn)
-        accuracies.append(acc)
-        kappas.append(kap)
+            acc, kap = calculate_metrics(tp, tn, fp, fn)
+            accuracies.append(acc)
+            kappas.append(kap)
 
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.plot(failure_rates * 100, np.array(accuracies) * 100, 'b-', linewidth=2, label='Accuracy')
-    ax.plot(failure_rates * 100, np.array(kappas) * 100, 'r-', linewidth=2, label='Kappa (×100)')
-    ax.axhline(y=0, color='gray', linestyle='--', alpha=0.5)
-    ax.axhline(y=40, color='green', linestyle=':', alpha=0.7, label='Kappa target (0.4)')
-    ax.set_xlabel('True Failure Rate (%)', fontsize=12)
-    ax.set_ylabel('Score', fontsize=12)
-    ax.set_title('Always Predict "Pass": Accuracy vs Kappa', fontsize=14)
-    ax.legend(loc='upper right')
-    ax.set_xlim(0, 50)
-    ax.set_ylim(-10, 105)
-    ax.grid(True, alpha=0.3)
+        fig, ax = plt.subplots(figsize=(10, 6))
+        ax.plot(failure_rates * 100, np.array(accuracies) * 100, 'b-', linewidth=2, label='Accuracy')
+        ax.plot(failure_rates * 100, np.array(kappas) * 100, 'r-', linewidth=2, label='Kappa (×100)')
+        ax.axhline(y=0, color='gray', linestyle='--', alpha=0.5)
+        ax.axhline(y=40, color='green', linestyle=':', alpha=0.7, label='Kappa target (0.4)')
+        ax.set_xlabel('True Failure Rate (%)', fontsize=12)
+        ax.set_ylabel('Score', fontsize=12)
+        ax.set_title('Always Predict "Pass": Accuracy vs Kappa', fontsize=14)
+        ax.legend(loc='upper right')
+        ax.set_xlim(0, 50)
+        ax.set_ylim(-10, 105)
+        ax.grid(True, alpha=0.3)
 
-    plt.tight_layout()
+        plt.tight_layout()
 
-    mo.md(
-        """
-        ### "Always Predict Pass" Evaluator
+        _md = mo.md(
+            """
+            ### "Always Predict Pass" Evaluator
 
-        The plot shows what happens when an evaluator always predicts "pass":
+            The plot shows what happens when an evaluator always predicts "pass":
 
-        - **Blue line (Accuracy):** Decreases linearly as failure rate increases
-        - **Red line (Kappa):** Always 0 regardless of failure rate!
+            - **Blue line (Accuracy):** Decreases linearly as failure rate increases
+            - **Red line (Kappa):** Always 0 regardless of failure rate!
 
-        **Key insight:** A 90% accurate "always pass" evaluator has Kappa = 0,
-        revealing it's no better than guessing.
-        """
-    )
+            **Key insight:** A 90% accurate "always pass" evaluator has Kappa = 0,
+            revealing it's no better than guessing.
+            """
+        )
 
-    mo.ui.matplotlib(fig)
-    return (
-        acc,
-        accuracies,
-        ax,
-        calculate_metrics,
-        fail_rate,
-        failure_rates,
-        fig,
-        fn,
-        fp,
-        kap,
-        kappas,
-        n,
-        n_fail,
-        n_pass,
-        tn,
-        tp,
-    )
+        import io, base64
+        _buf = io.BytesIO()
+        fig.savefig(_buf, format="png", dpi=144, bbox_inches="tight")
+        _buf.seek(0)
+        _img_b64 = base64.b64encode(_buf.read()).decode("ascii")
+        _buf.close()
+        _img_component = mo.md(f'<img src="data:image/png;base64,{_img_b64}" style="max-width:100%; height:auto;" />')
+
+        return mo.vstack([_md, _img_component])
 
 
-@app.cell
-def _(mo):
-    mo.md(
-        """
-        ## Part 2: Interactive Confusion Matrix
+    _()
 
-        Adjust the sliders to see how different prediction patterns affect Kappa.
-        """
-    )
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md("""
+    ## Part 2: Interactive Confusion Matrix
+
+    Adjust the sliders to see how different prediction patterns affect Kappa.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
 def _(mo):
     # Interactive confusion matrix
     tp_viz = mo.ui.slider(0, 100, value=70, label="True Positives (TP)")
@@ -172,8 +164,8 @@ def _(mo):
     return fn_viz, fp_viz, tn_viz, tp_viz
 
 
-@app.cell
-def _(calculate_metrics, fn_viz, fp_viz, mo, np, plt, tn_viz, tp_viz):
+@app.cell(hide_code=True)
+def _(calculate_metrics, fn_viz, fp_viz, np, plt, tn_viz, tp_viz):
     tp_v = tp_viz.value
     tn_v = tn_viz.value
     fp_v = fp_viz.value
@@ -181,9 +173,29 @@ def _(calculate_metrics, fn_viz, fp_viz, mo, np, plt, tn_viz, tp_viz):
     n_v = tp_v + tn_v + fp_v + fn_v
 
     if n_v == 0:
-        mo.md("**Add some samples using the sliders!**")
+        fig2, ax = plt.subplots(1, 1, figsize=(8, 4))
+        ax.axis('off')
+        ax.text(0.5, 0.5, "Add some samples using the sliders!", ha="center", va="center", fontsize=14, fontweight="bold")
+        plt.tight_layout()
+        plt.gca()
     else:
-        acc_v, kappa_v = calculate_metrics(tp_v, tn_v, fp_v, fn_v)
+        def _calculate_metrics(_tp, _tn, _fp, _fn):
+            _n = _tp + _tn + _fp + _fn
+            _acc = (_tp + _tn) / _n if _n > 0 else 0.0
+            if _n == 0:
+                return _acc, 0.0
+            _pred_pos = _tp + _fp
+            _pred_neg = _tn + _fn
+            _actual_pos = _tp + _fn
+            _actual_neg = _tn + _fp
+            _pe = ((_pred_pos / _n) * (_actual_pos / _n) + (_pred_neg / _n) * (_actual_neg / _n)) if _n > 0 else 0.0
+            _kappa = (_acc - _pe) / (1 - _pe) if (1 - _pe) != 0 else 0.0
+            return _acc, _kappa
+
+        try:
+            acc_v, kappa_v = calculate_metrics(tp_v, tn_v, fp_v, fn_v)
+        except NameError:
+            acc_v, kappa_v = _calculate_metrics(tp_v, tn_v, fp_v, fn_v)
 
         # Calculate additional metrics
         fail_recall_v = tn_v / (tn_v + fn_v) if (tn_v + fn_v) > 0 else 0
@@ -220,95 +232,24 @@ def _(calculate_metrics, fn_viz, fp_viz, mo, np, plt, tn_viz, tp_viz):
         ax2.axhline(y=0.8, color='orange', linestyle=':', alpha=0.7, label='Fail recall target')
         ax2.set_ylabel('Score', fontsize=12)
         ax2.set_title('Evaluation Metrics', fontsize=14)
-        ax2.set_ylim(0, 1.1)
-        ax2.legend(loc='upper right')
+        plt.gca()
 
-        # Add value labels on bars
-        for bar, val in zip(bars, values):
-            height = bar.get_height()
-            ax2.text(bar.get_x() + bar.get_width()/2., height + 0.02,
-                    f'{val:.2f}', ha='center', va='bottom', fontsize=11)
+    fig2
 
-        plt.tight_layout()
-
-        # Interpretation
-        if kappa_v < 0:
-            kappa_interp = "Worse than chance"
-        elif kappa_v < 0.2:
-            kappa_interp = "Slight"
-        elif kappa_v < 0.4:
-            kappa_interp = "Fair"
-        elif kappa_v < 0.6:
-            kappa_interp = "Substantial ✓"
-        elif kappa_v < 0.8:
-            kappa_interp = "Excellent ✓✓"
-        else:
-            kappa_interp = "Near-perfect ✓✓✓"
-
-        fail_recall_interp = "✓ Good" if fail_recall_v >= 0.8 else "⚠️ Too low"
-
-        mo.vstack([
-            mo.ui.matplotlib(fig2),
-            mo.md(
-                f"""
-                ### Interpretation
-
-                | Metric | Value | Assessment |
-                |--------|-------|------------|
-                | Samples | {n_v} | - |
-                | Accuracy | {acc_v:.1%} | (misleading alone) |
-                | **Cohen's Kappa** | **{kappa_v:.3f}** | **{kappa_interp}** |
-                | **Fail Recall** | **{fail_recall_v:.1%}** | **{fail_recall_interp}** |
-
-                **Tips:**
-                - Increase TN (catching failures) to improve fail recall
-                - Balance TP and TN to improve Kappa
-                - High FP (false alarms) is acceptable if fail recall is high
-                """
-            ),
-        ])
-    return (
-        acc_v,
-        ax1,
-        ax2,
-        bars,
-        colors,
-        conf_matrix,
-        fail_recall_interp,
-        fail_recall_v,
-        fig2,
-        fn_v,
-        fp_v,
-        height,
-        i,
-        im,
-        j,
-        kappa_interp,
-        kappa_v,
-        metrics,
-        n_v,
-        pass_recall_v,
-        text,
-        tn_v,
-        tp_v,
-        val,
-        values,
-    )
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        """
-        ## Part 3: Failure Rate Impact
-
-        How does the true failure rate in your dataset affect evaluation difficulty?
-        """
-    )
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md("""
+    ## Part 3: Failure Rate Impact
+
+    How does the true failure rate in your dataset affect evaluation difficulty?
+    """)
+    return
+
+
+@app.cell(hide_code=True)
 def _(mo, np, plt):
     # Simulate a "good" evaluator at different failure rates
     failure_rates_sim = np.linspace(0.05, 0.5, 20)
@@ -369,7 +310,7 @@ def _(mo, np, plt):
     plt.tight_layout()
 
     mo.vstack([
-        mo.ui.matplotlib(fig3),
+        fig3,
         mo.md(
             """
             ### Observations
@@ -385,65 +326,41 @@ def _(mo, np, plt):
             """
         ),
     ])
-    return (
-        ax3,
-        fail_accuracy,
-        fail_rate,
-        fail_rates_plot,
-        fail_recall,
-        failure_rates_sim,
-        fig3,
-        fn,
-        fp,
-        kappa,
-        n_fail,
-        n_pass,
-        n_samples,
-        pass_accuracy,
-        pe,
-        po,
-        p_pred_pass,
-        p_true_pass,
-        results_sim,
-        tn,
-        total,
-        tp,
-    )
+
+    return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        """
-        ## Key Takeaways
+    mo.md("""
+    ## Key Takeaways
 
-        1. **Kappa reveals the truth** that accuracy hides:
-           - "Always pass" has high accuracy but Kappa = 0
-           - Kappa penalizes majority-class guessing
+    1. **Kappa reveals the truth** that accuracy hides:
+       - "Always pass" has high accuracy but Kappa = 0
+       - Kappa penalizes majority-class guessing
 
-        2. **Target ranges** (per Eugene Yan):
-           - Kappa: 0.4-0.6 (substantial agreement)
-           - Fail Recall: >80% (catching failures)
-           - Dataset failure rate: ~35% (meaningful signal)
+    2. **Target ranges** (per Eugene Yan):
+       - Kappa: 0.4-0.6 (substantial agreement)
+       - Fail Recall: >80% (catching failures)
+       - Dataset failure rate: ~35% (meaningful signal)
 
-        3. **Trade-offs:**
-           - Higher fail recall often means more false positives (acceptable)
-           - Optimizing only for accuracy encourages majority-class guessing
+    3. **Trade-offs:**
+       - Higher fail recall often means more false positives (acceptable)
+       - Optimizing only for accuracy encourages majority-class guessing
 
-        4. **Human baseline:**
-           - Inter-rater reliability is often only Kappa 0.2-0.3
-           - Getting Kappa 0.5 with LLM is actually impressive!
+    4. **Human baseline:**
+       - Inter-rater reliability is often only Kappa 0.2-0.3
+       - Getting Kappa 0.5 with LLM is actually impressive!
 
-        ---
+    ---
 
-        **Congratulations!** You've completed the notebook series.
+    **Congratulations!** You've completed the notebook series.
 
-        Next steps:
-        - Run `uv run verify_evaluator.py --sample 50` for real evaluation
-        - Explore `examples/` for code patterns
-        - Read `docs/tutorial/` for the full learning progression
-        """
-    )
+    Next steps:
+    - Run `uv run verify_evaluator.py --sample 50` for real evaluation
+    - Explore `examples/` for code patterns
+    - Read `docs/tutorial/` for the full learning progression
+    """)
     return
 
 

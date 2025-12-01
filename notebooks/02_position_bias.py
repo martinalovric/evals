@@ -10,11 +10,11 @@ and how to detect and handle it.
 
 import marimo
 
-__generated_with = "0.10.0"
+__generated_with = "0.18.1"
 app = marimo.App(width="medium")
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _():
     import marimo as mo
 
@@ -36,40 +36,36 @@ def _():
     return (mo,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        """
-        ## The Problem
+    mo.md("""
+    ## The Problem
 
-        Imagine comparing two responses:
+    Imagine comparing two responses:
 
-        ```
-        Prompt: "Which response is better?"
+    ```
+    Prompt: "Which response is better?"
 
-        Response A: [Brief answer]
-        Response B: [Detailed explanation]
-        ```
+    Response A: [Brief answer]
+    Response B: [Detailed explanation]
+    ```
 
-        A model with position bias might prefer:
-        - **Primacy bias**: Always the first option (A)
-        - **Recency bias**: Always the last option (B)
+    A model with position bias might prefer:
+    - **Primacy bias**: Always the first option (A)
+    - **Recency bias**: Always the last option (B)
 
-        This makes A/B tests unreliable!
-        """
-    )
+    This makes A/B tests unreliable!
+    """)
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        """
-        ## Simulated Position Bias
+    mo.md("""
+    ## Simulated Position Bias
 
-        Let's simulate what position bias looks like with synthetic data.
-        """
-    )
+    Let's simulate what position bias looks like with synthetic data.
+    """)
     return
 
 
@@ -98,11 +94,10 @@ def _():
             return first_label  # Biased toward first position
         else:
             return true_winner  # Correct answer
-
     return random, simulate_comparison
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     bias_slider = mo.ui.slider(
         0, 1, value=0.4, step=0.1,
@@ -119,106 +114,96 @@ def _(mo):
 
 @app.cell
 def _(bias_slider, mo, random, simulate_comparison, trials_slider):
-    random.seed(42)  # For reproducibility
+    def _():
+        random.seed(42)  # For reproducibility
 
-    bias = bias_slider.value
-    n_trials = trials_slider.value
+        bias = bias_slider.value
+        n_trials = trials_slider.value
 
-    # Run trials
-    results = {"consistent": 0, "inconsistent": 0}
+        # Run trials
+        results = {"consistent": 0, "inconsistent": 0}
 
-    for _ in range(n_trials):
-        # Round 1: A shown first
-        result1 = simulate_comparison("brief", "detailed", "A", bias)
+        for _ in range(n_trials):
+            # Round 1: A shown first
+            result1 = simulate_comparison("brief", "detailed", "A", bias)
 
-        # Round 2: B shown first (swapped)
-        result2 = simulate_comparison("detailed", "brief", "B", bias)
+            # Round 2: B shown first (swapped)
+            result2 = simulate_comparison("detailed", "brief", "B", bias)
 
-        if result1 == result2:
-            results["consistent"] += 1
-        else:
-            results["inconsistent"] += 1
-
-    consistency_rate = results["consistent"] / n_trials
-    bias_detection_rate = results["inconsistent"] / n_trials
-
-    mo.md(
-        f"""
-        ## Simulation Results
-
-        **Settings:**
-        - Position bias strength: {bias:.0%}
-        - Trials: {n_trials}
-
-        **Results:**
-        | Outcome | Count | Rate |
-        |---------|-------|------|
-        | Consistent (same winner both rounds) | {results['consistent']} | {consistency_rate:.1%} |
-        | Inconsistent (different winners → bias detected) | {results['inconsistent']} | {bias_detection_rate:.1%} |
-
-        **Interpretation:**
-        - Inconsistent results indicate position bias was detected
-        - At {bias:.0%} bias strength, we detect it {bias_detection_rate:.1%} of the time
-        - In production, return "tie" for inconsistent comparisons
-        """
-    )
-    return (
-        bias,
-        bias_detection_rate,
-        consistency_rate,
-        n_trials,
-        result1,
-        result2,
-        results,
-    )
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        """
-        ## Detection Algorithm
-
-        The fix is simple: run every comparison **twice** with swapped order.
-
-        ```python
-        def compare_with_bias_detection(response_a, response_b):
-            # Round 1: Original order
-            result1 = compare(response_a, response_b, labels=("A", "B"))
-
-            # Round 2: Swapped order
-            result2 = compare(response_b, response_a, labels=("B", "A"))
-
-            # Check consistency
             if result1 == result2:
-                return result1  # Genuine preference
+                results["consistent"] += 1
             else:
-                return "tie"    # Position bias detected
-        ```
+                results["inconsistent"] += 1
 
-        This doubles API costs but ensures reliable results.
-        """
-    )
+        consistency_rate = results["consistent"] / n_trials
+        bias_detection_rate = results["inconsistent"] / n_trials
+        return mo.md(
+            f"""
+            ## Simulation Results
+
+            **Settings:**
+            - Position bias strength: {bias:.0%}
+            - Trials: {n_trials}
+
+            **Results:**
+            - Consistent (same winner both rounds): {results['consistent']} (rate: {consistency_rate:.1%})
+            - Inconsistent (different winners → bias detected): {results['inconsistent']} (rate: {bias_detection_rate:.1%})
+
+
+            **Interpretation:**
+            - Inconsistent results indicate position bias was detected
+            - At {bias:.0%} bias strength, we detect it {bias_detection_rate:.1%} of the time
+            - In production, return "tie" for inconsistent comparisons
+            """
+        )
+
+
+    _()
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        """
-        ## Live API Experiment (Optional)
+    mo.md("""
+    ## Detection Algorithm
 
-        Run an actual position bias test with the OpenAI API.
+    The fix is simple: run every comparison **twice** with swapped order.
 
-        **Requirements:**
-        - Set `OPENAI_API_KEY` environment variable
-        - This will make 2 API calls
-        """
-    )
+    ```python
+    def compare_with_bias_detection(response_a, response_b):
+        # Round 1: Original order
+        result1 = compare(response_a, response_b, labels=("A", "B"))
+
+        # Round 2: Swapped order
+        result2 = compare(response_b, response_a, labels=("B", "A"))
+
+        # Check consistency
+        if result1 == result2:
+            return result1  # Genuine preference
+        else:
+            return "tie"    # Position bias detected
+    ```
+
+    This doubles API costs but ensures reliable results.
+    """)
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md("""
+    ## Live API Experiment (Optional)
+
+    Run an actual position bias test with the OpenAI API.
+
+    **Requirements:**
+    - Set `OPENAI_API_KEY` environment variable
+    - This will make 2 API calls
+    """)
+    return
+
+
+@app.cell(hide_code=True)
 def _(mo):
     run_button = mo.ui.run_button(label="Run Live Position Bias Test")
     run_button
@@ -229,13 +214,16 @@ def _(mo):
 def _(mo, run_button):
     import os
     import json
+    import textwrap
+
+    output_md = None
 
     if not run_button.value:
-        mo.md("*Click the button above to run the live test*")
+        _output_md = mo.md("Click the button above to run the live test")
     else:
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
-            mo.md("**Error:** OPENAI_API_KEY not set. Please set it in your environment.")
+            _output_md = mo.md("Error: OPENAI_API_KEY not set. Please set it in your environment.")
         else:
             try:
                 from openai import OpenAI
@@ -253,10 +241,7 @@ def _(mo, run_button):
                     "parameters": {
                         "type": "object",
                         "properties": {
-                            "winner": {
-                                "type": "string",
-                                "enum": ["A", "B", "tie"],
-                            }
+                            "winner": {"type": "string", "enum": ["A", "B", "tie"]},
                         },
                         "required": ["winner"],
                         "additionalProperties": False,
@@ -265,18 +250,13 @@ def _(mo, run_button):
 
                 def compare(resp_1, resp_2, labels):
                     prompt = f"""Compare these two responses and decide which is better.
+    Question: {question}
 
-Question: {question}
+    Response {labels[0]}: {resp_1}
 
-Response {labels[0]}:
-{resp_1}
+    Response {labels[1]}: {resp_2}
 
-Response {labels[1]}:
-{resp_2}
-
-Which response is better? Call submit_comparison with your choice."""
-
-                    # Update tool enum dynamically
+    Which response is better? Call submit_comparison with your choice."""
                     tool_copy = json.loads(json.dumps(tool))
                     tool_copy["parameters"]["properties"]["winner"]["enum"] = [labels[0], labels[1], "tie"]
 
@@ -284,8 +264,7 @@ Which response is better? Call submit_comparison with your choice."""
                         model="gpt-5-mini-2025-08-07",
                         input=[{"role": "user", "content": prompt}],
                         tools=[tool_copy],
-                        tool_choice={"type": "function", "name": "submit_comparison"},
-                        max_completion_tokens=50,
+                        tool_choice={"type": "function", "name": "submit_comparison"}
                     )
 
                     for item in result.output:
@@ -295,11 +274,9 @@ Which response is better? Call submit_comparison with your choice."""
 
                 # Round 1: A first
                 result1 = compare(response_a, response_b, ("A", "B"))
-
                 # Round 2: B first (swapped)
                 result2 = compare(response_b, response_a, ("B", "A"))
 
-                # Determine outcome
                 if result1 == result2:
                     final = result1
                     bias_detected = False
@@ -307,57 +284,60 @@ Which response is better? Call submit_comparison with your choice."""
                     final = "tie"
                     bias_detected = True
 
-                mo.md(
-                    f"""
-                    ## Live Test Results
+                _output_md = mo.md(
+                    textwrap.dedent(
+                        f"""
+                        ## Live Test Results
 
-                    **Responses compared:**
-                    - **A (brief):** "{response_a}"
-                    - **B (detailed):** "{response_b[:50]}..."
+                        **Responses compared:**
+                        - **A (brief):** "{response_a}"
+                        - **B (detailed):** "{response_b[:50]}..."
 
-                    **Results:**
-                    | Round | Order | Winner |
-                    |-------|-------|--------|
-                    | 1 | A first, B second | {result1} |
-                    | 2 | B first, A second | {result2} |
+                        **Results:**
 
-                    **Analysis:**
-                    - Position bias detected: **{'YES' if bias_detected else 'NO'}**
-                    - Final verdict: **{final}**
+                        | Round | Order | Winner |
+                        |-------|-------|--------|
+                        | 1 | A first, B second | {result1} |
+                        | 2 | B first, A second | {result2} |
 
-                    {'⚠️ Different answers in each round indicates position bias. We return "tie" to avoid a misleading result.' if bias_detected else '✓ Consistent answers - the model genuinely prefers this response.'}
-                    """
+                        **Analysis:**
+                        - Position bias detected: **{'YES' if bias_detected else 'NO'}**
+                        - Final verdict: **{final}**
+
+                        {'⚠️ Different answers in each round indicates position bias. We return "tie" to avoid a misleading result.' if bias_detected else '✓ Consistent answers - the model genuinely prefers this response.'}
+                        """
+                    )
                 )
 
             except Exception as e:
-                mo.md(f"**Error:** {e}")
-    return api_key, client, compare, json, os, question, response_a, response_b, tool
+                _output_md = mo.md(f"**Error:** {e}")
+    _output_md
+
+    return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        """
-        ## Key Takeaways
+    mo.md("""
+    ## Key Takeaways
 
-        1. **Position bias is real** - LLMs can prefer responses based on order
+    1. **Position bias is real** - LLMs can prefer responses based on order
 
-        2. **Detection is simple** - Run comparison twice with swapped order
+    2. **Detection is simple** - Run comparison twice with swapped order
 
-        3. **Handle inconsistency** - Return "tie" when results differ
+    3. **Handle inconsistency** - Return "tie" when results differ
 
-        4. **Track bias rate** - High rates (>20%) indicate problems:
-           - Responses too similar to distinguish
-           - Model has strong position preference
-           - Prompt needs improvement
+    4. **Track bias rate** - High rates (>20%) indicate problems:
+       - Responses too similar to distinguish
+       - Model has strong position preference
+       - Prompt needs improvement
 
-        5. **Newer models are better** - GPT-5.x has less position bias than older models
+    5. **Newer models are better** - GPT-5.x has less position bias than older models
 
-        ---
+    ---
 
-        **Next:** Open `notebooks/03_kappa_intuition.py` for Kappa visualizations
-        """
-    )
+    **Next:** Open `notebooks/03_kappa_intuition.py` for Kappa visualizations
+    """)
     return
 
 
