@@ -1,0 +1,21 @@
+id;question;answer;ground_truth_label;ground_truth_reasoning
+1;Koji klub je osvojio Premier Ligu u sezoni 2024/2025?;Liverpool;Pass;Tocan odgovor je Liverpool
+2;Koji tim je zavrsio na drugom mjestu u Premier Ligi 2024/2025?;Manchester United;Fail;Netocno, tocan odgovor je Arsenal
+3;Koja tri kluba su ispala iz Premier Lige 2024/2025?;Leicester, Southampton;Fail;Nepotpun odgovor, treba 3 kluba
+4;Koji klub je zavrsio na cetvrtom mjestu i osigurao Ligu prvaka?;Chelsea;Pass;Tocan odgovor je Chelsea
+5;Koliko je bodova imao prvak Premier Lige na kraju sezone?;82;Fail;Netocno. Imao je 84
+6;Tko je bio najbolji strijelac Premier Lige u sezoni 2024/2025?;Salah;Pass;Tocno, Salah je najbolji strijelac
+7;Koliko je golova postigao najbolji strijelac?;29;Pass;Tocno, zabio je 29 golova
+8;Koji igrac je imao najvise asistencija u sezoni?;Mohammed S.;Pass;Tocno, iako je napisano skraceno
+9;Tko je bio golman godine u Premier Ligi 2024/2025?;D. Raya;Pass;Tocno, golman sezone bio je David Raya
+10;Koji igrac je osvojio nagradu za igraca sezone?;M. Salah;Pass;Tocno, Salah je osvojio nagradu za igraca sezone
+11;Koji mladi igrac (ispod 23 godine) se najvise isticao?;Gravenberch;Pass;Tocno, Gravenberch
+12;Koji je bio rezultat north London derbija izmedu Arsenala i Tottenhama u prvom krugu?;1-0, Arsenal;Pass;Tocno, napisano u suprotnom smjeru ali obrazlozeno
+13;Koji tim je imao najdulju pobjednicku seriju u sezoni?;Newcastle;Pass;Tocno, Newcastle
+14;Koja utakmica je imala najvise golova u sezoni?;Tottanham;Fail;Netocno, traze se 2 kluba
+15;Koji je trener bio otpusten prvi u sezoni 2024/2025?;Ten Hag;Pass;Tocno, Erik Ten Hag
+16;Koji novi trener je preuzeo Manchester United tijekom sezone?;Ruben Amorim;Pass;Tocno Ruben Amorim
+17;Kolika je bila razlika u bodovima izmedu prvog i drugog mjesta?;9;Fail;Netocno, blizu ali netocno, tocan odg je 10
+18;Koji tim je imao najbolju obranu (najmanje primljenih golova)?;Arsenal;Pass;Tocno, Arsenal je primio najmanje golova
+19;Koji tim je postigao najvise golova u sezoni?;Liv;Pass;Tocno, iako je napisano skraceno
+20;Koji klub je imao najveci transfer u zimskom prijelaznom roku?;Al Nassr;Pass;Tocno, Al Nassr
